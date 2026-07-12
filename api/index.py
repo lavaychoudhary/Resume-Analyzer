@@ -13,6 +13,10 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from extractors.text_extractor import ExtractionError, extract_text
 from schemas.models import AnalysisResult
 from services.gemini_service import GeminiServiceError, analyze_resume
