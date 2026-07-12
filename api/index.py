@@ -52,7 +52,7 @@ async def health_check():
     return {"status": "ok"}
 
 
-@app.post("/api/analyze", response_model=AnalysisResult)
+@app.post("/api", response_model=AnalysisResult)
 async def analyze(
     resume: UploadFile = File(..., description="Resume file (PDF or DOCX)"),
     job_description: str = Form(..., description="Job description text"),
