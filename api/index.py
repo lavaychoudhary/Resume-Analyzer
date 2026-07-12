@@ -121,9 +121,13 @@ async def analyze(
 # ── Global exception handler for unexpected errors ─────────────────────────
 
 
+import traceback
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Catch-all handler to prevent leaking internal errors to the client."""
+    print("Unhandled exception in API:")
+    traceback.print_exc()
     return JSONResponse(
         status_code=500,
         content={"detail": "An unexpected error occurred. Please try again later."},
