@@ -1,0 +1,73 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-beige-50 text-espresso font-sans antialiased selection:bg-terracotta selection:text-white;
+  }
+
+  :focus-visible {
+    outline: 2px solid theme('colors.navy.DEFAULT');
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/90 backdrop-blur-xl border border-beige-200 rounded-2xl shadow-soft;
+  }
+  
+  .glass-panel-hover {
+    @apply glass-panel transition-all duration-300 hover:shadow-glow hover:-translate-y-1;
+  }
+  
+  .btn-primary {
+    @apply w-full py-3.5 px-6 rounded-xl font-display font-semibold text-white
+           bg-navy hover:bg-navy-light
+           disabled:bg-beige-200 disabled:text-espresso-muted disabled:cursor-not-allowed
+           disabled:hover:transform-none disabled:hover:shadow-none
+           transition-all duration-300 shadow-lg shadow-navy/20
+           hover:shadow-glow hover:-translate-y-0.5
+           flex items-center justify-center gap-2;
+  }
+
+  .input-textarea {
+    @apply w-full bg-beige-50 border border-beige-200 rounded-xl p-4
+           text-espresso placeholder-espresso-muted
+           focus:outline-none focus:ring-2 focus:ring-navy/40 focus:border-navy/40
+           transition-all duration-300 resize-none font-sans shadow-inner;
+  }
+
+  .tag-chip {
+    @apply px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 inline-flex items-center;
+  }
+
+  .tag-chip-emerald {
+    @apply tag-chip bg-emerald-soft text-emerald border border-emerald/20 hover:bg-emerald/10;
+  }
+  
+  .tag-chip-rose {
+    @apply tag-chip bg-rose-soft text-rose border border-rose/20 hover:bg-rose/10;
+  }
+  
+  .tag-chip-gold {
+    @apply tag-chip bg-gold-soft text-gold border border-gold/30 hover:bg-gold/20;
+  }
+  
+  .tag-chip-navy {
+    @apply tag-chip bg-navy-soft text-navy border border-navy/20 hover:bg-navy/10;
+  }
+
+  .section-title {
+    @apply font-display text-lg font-bold text-espresso mb-4 flex items-center gap-2;
+  }
+}
+
+@layer utilities {
+  .redline-strike {
+    text-decoration: line-through;
+    text-decoration-color: theme('colors.rose.DEFAULT');
+    text-decoration-thickness: 1.5px;
+  }
+}
