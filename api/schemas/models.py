@@ -102,15 +102,23 @@ class InterviewQuestion(BaseModel):
 class AnalysisResult(BaseModel):
     """Complete resume analysis result returned by the API."""
 
+    is_resume: bool = Field(
+        default=True,
+        description="True if the uploaded document is a genuine resume, CV, or professional profile. False if not a resume.",
+    )
+    rejection_reason: str = Field(
+        default="",
+        description="Explanation if the uploaded document is determined not to be a resume.",
+    )
     match_score: int = Field(
-        ..., ge=0, le=100, description="Overall match score 0-100"
+        default=0, ge=0, le=100, description="Overall match score 0-100"
     )
     score_label: str = Field(
         default="",
         description="Human-readable label derived from match_score (computed in code, not by the model)",
     )
     summary: str = Field(
-        ..., description="2-3 sentence overall assessment of the match"
+        default="", description="2-3 sentence overall assessment of the match"
     )
     matched_keywords: list[str] = Field(
         default_factory=list,
@@ -137,16 +145,16 @@ class AnalysisResult(BaseModel):
         description="Formatting issues that could trip up an ATS, or 'None detected'",
     )
     impact_assessment: ImpactAssessment = Field(
-        ..., description="Assessment of quantifiable impact in resume bullets"
+        default_factory=lambda: ImpactAssessment(impact_score=0, summary=""),
+        description="Assessment of quantifiable impact in resume bullets",
     )
     soft_skills_assessment: SoftSkillsAssessment = Field(
-        ..., description="Assessment of soft skills and leadership signals"
+        default_factory=lambda: SoftSkillsAssessment(summary=""),
+        description="Assessment of soft skills and leadership signals",
     )
     interview_prep_questions: list[InterviewQuestion] = Field(
-        ...,
-        min_length=3,
-        max_length=5,
-        description="3-5 tailored interview prep questions for this specific role",
+        default_factory=list,
+        description="Tailored interview prep questions for this specific role",
     )
 
     @model_validator(mode="after")

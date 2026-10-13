@@ -7,6 +7,7 @@ Provides endpoints for resume analysis using Gemini AI.
 from __future__ import annotations
 
 import os
+import re
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
@@ -22,7 +23,7 @@ from schemas.models import AnalysisResult
 from services.gemini_service import GeminiServiceError, analyze_resume
 
 # ── Load environment ───────────────────────────────────────────────────────
-load_dotenv()
+load_dotenv(override=True)
 
 # ── App setup ──────────────────────────────────────────────────────────────
 app = FastAPI(
@@ -110,13 +111,63 @@ async def analyze(
             ),
         )
 
+    # ── Strict verification: Is the uploaded file a resume? ─────────────
+    lower_text = resume_text.lower()
+
+    # Category 1: Obvious non-resume documents (recipes, invoices, terms, stories)
+    non_resume_markers = [
+        "ingredients:", "tablespoon", "teaspoon", "preheat oven", "bake for", "servings:",
+        "invoice number", "amount due:", "bill to:", "subtotal:", "tax invoice", "total due:",
+        "terms and conditions", "privacy policy", "chapter 1", "once upon a time",
+        "abstract\n", "in this paper we", "table of contents",
+    ]
+    if any(marker in lower_text for marker in non_resume_markers):
+        raise HTTPException(
+            status_code=422,
+            detail="This is not a resume! Please upload a valid resume or CV.",
+        )
+
+    # Category 2: Multi-pillar structural check
+    # Genuine resumes exhibit contact info, work history, education credentials, and skill lists.
+    has_contact = bool(re.search(r"[\w\.-]+@[\w\.-]+\.\w+", resume_text)) or bool(re.search(r"\+?\d[\d\s\-\(\)]{8,}\d", resume_text)) or "linkedin" in lower_text or "github" in lower_text
+    has_work = any(w in lower_text for w in [
+        "experience", "work history", "employment", "professional experience",
+        "internship", "job history", "responsibilities", "work summary"
+    ])
+    has_edu = any(w in lower_text for w in [
+        "education", "bachelor", "master", "university", "college", "degree",
+        "b.tech", "b.e", "bsc", "msc", "mba", "phd", "academic background"
+    ])
+    has_skills = any(w in lower_text for w in [
+        "skills", "technical skills", "technologies", "competencies", "tools & technologies", "proficiencies", "programming"
+    ])
+    has_cv_terms = any(w in lower_text for w in [
+        "curriculum vitae", "resume", "summary of qualifications", "projects", "certifications"
+    ])
+
+    pillar_count = sum([has_contact, has_work, has_edu, has_skills, has_cv_terms])
+
+    # A document with fewer than 2 resume pillars is not a resume
+    if pillar_count < 2 and not (has_work and has_skills):
+        raise HTTPException(
+            status_code=422,
+            detail="This is not a resume! Please upload a valid resume or CV.",
+        )
+
     # ── Call Gemini for analysis ───────────────────────────────────────
     try:
         result = await analyze_resume(resume_text, job_description)
-    except GeminiServiceError:
+    except GeminiServiceError as exc:
         raise HTTPException(
             status_code=502,
-            detail="Analysis service is currently unavailable. Please try again later.",
+            detail=str(exc),
+        )
+
+    # ── AI verification check ──────────────────────────────────────────
+    if not result.is_resume:
+        raise HTTPException(
+            status_code=422,
+            detail="This is not a resume! Please upload a valid resume or CV.",
         )
 
     return result

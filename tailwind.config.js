@@ -4,61 +4,77 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Strict Palette: White, Beige, and Green
         beige: {
-          50: '#FDFBF7',
-          100: '#F5F2EB',
-          200: '#EBE5D9',
-          300: '#DED5C3',
+          25:  '#FCFAF7',
+          50:  '#F9F7F2',
+          100: '#F3EFE6',
+          150: '#ECE6D9',
+          200: '#E4DDCF',
+          300: '#D3C9B6',
+          400: '#BDB19B',
+          500: '#9E927C',
+          800: '#453E32',
+          900: '#2A251E',
         },
-        espresso: {
-          DEFAULT: '#2D2422',
-          light: '#4A3E3C',
-          muted: '#8A7B78',
+        cream: {
+          50:  '#F9F7F2',
+          100: '#F3EFE6',
+          200: '#E4DDCF',
+          300: '#D3C9B6',
         },
-        navy: {
-          DEFAULT: '#1A2B4C',
-          light: '#2A406B',
-          soft: '#EAF0F8',
+        green: {
+          50:  '#F0FDF4',
+          100: '#DCFCE7',
+          200: '#BBF7D0',
+          300: '#86EFAC',
+          400: '#4ADE80',
+          500: '#22C55E',
+          600: '#16A34A',
+          700: '#15803D',
+          800: '#166534',
+          900: '#14532D',
         },
-        terracotta: {
-          DEFAULT: '#E07A5F',
-          soft: '#FDECE8',
+        ink: {
+          DEFAULT: '#111111',
+          light:   '#2C2A29',
+          muted:   '#5C5850',
+          faint:   '#8C867B',
         },
-        emerald: {
-          DEFAULT: '#2E8B57',
-          soft: '#E8F5EE',
-        },
-        gold: {
-          DEFAULT: '#D4AF37',
-          soft: '#FBF8E6',
-        },
-        rose: {
-          DEFAULT: '#E57373',
-          soft: '#FCECEC',
-        }
       },
       fontFamily: {
         display: ["Outfit", "system-ui", "sans-serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans:    ["Inter", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        soft: "0 8px 30px rgba(45, 36, 34, 0.04)",
-        glow: "0 0 20px rgba(26, 43, 76, 0.15)",
-        'glow-terracotta': "0 0 20px rgba(224, 122, 95, 0.2)",
+        card: "0 1px 3px rgba(42, 37, 30, 0.05), 0 4px 16px rgba(42, 37, 30, 0.04)",
+        'card-hover': "0 6px 24px rgba(42, 37, 30, 0.08)",
+        green: "0 4px 16px rgba(22, 163, 74, 0.25)",
+        'green-lg': "0 8px 30px rgba(22, 163, 74, 0.35)",
       },
       keyframes: {
+        scanline: {
+          "0%":   { top: "0%" },
+          "100%": { top: "100%" },
+        },
+        pulseSlow: {
+          "0%, 100%": { opacity: "1", transform: "scale(1)" },
+          "50%":      { opacity: "0.85", transform: "scale(1.02)" },
+        },
         fadeUp: {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "0%":   { opacity: "0", transform: "translateY(12px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         fadeIn: {
-          "0%": { opacity: "0" },
+          "0%":   { opacity: "0" },
           "100%": { opacity: "1" },
-        }
+        },
       },
       animation: {
-        fadeUp: "fadeUp 0.4s ease-out forwards",
-        fadeIn: "fadeIn 0.3s ease-out forwards",
+        scanline:   "scanline 2s ease-in-out infinite alternate",
+        pulseSlow:  "pulseSlow 3s ease-in-out infinite",
+        fadeUp:     "fadeUp 0.4s ease-out forwards",
+        fadeIn:     "fadeIn 0.25s ease-out forwards",
       },
     },
   },

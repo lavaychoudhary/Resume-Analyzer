@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, MessagesSquare } from "lucide-react";
+import { ChevronDown, MessageSquare, HelpCircle, CheckCircle2 } from "lucide-react";
 import type { InterviewQuestion } from "../types/analysis";
 
 interface InterviewPrepPanelProps {
@@ -7,53 +7,67 @@ interface InterviewPrepPanelProps {
 }
 
 export default function InterviewPrepPanel({ questions }: InterviewPrepPanelProps) {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <div>
-      <div className="section-title">
-        <MessagesSquare size={18} className="text-navy" strokeWidth={2.5} />
-        <h3 className="!mb-0">Practice For Your Interview</h3>
+    <div className="bg-white p-6 rounded-xl border border-beige-200 shadow-sm">
+      <div className="flex items-center gap-2.5 mb-2">
+        <div className="w-8 h-8 rounded-lg bg-green-50 text-green-700 flex items-center justify-center border border-green-200">
+          <MessageSquare size={16} strokeWidth={2} />
+        </div>
+        <div>
+          <h3 className="font-display text-base font-bold text-ink">Role-Specific Interview Questions</h3>
+          <p className="text-xs text-ink-muted">High-probability questions tailored to your experience gaps & strengths</p>
+        </div>
       </div>
-      <p className="mb-6 font-sans text-sm leading-relaxed text-espresso-muted">
-        Questions this role's interviewer is likely to ask, based on this specific resume.
-      </p>
 
-      <div className="space-y-4">
+      <div className="space-y-3 mt-5">
         {questions.map((q, i) => {
-          const open = openIndex === i;
+          const isOpen = openIndex === i;
           return (
-            <div key={i} className="rounded-xl border border-beige-200 bg-white/60 overflow-hidden shadow-sm transition-all hover:shadow-md">
-              <div className="p-5">
-                <p className="font-mono text-xs font-bold text-navy mb-2">
-                  Q{String(i + 1).padStart(2, "0")}
-                </p>
-                <p className="font-sans text-base font-semibold leading-snug text-espresso">
+            <div
+              key={i}
+              className={`rounded-xl border transition-all duration-200 overflow-hidden ${
+                isOpen
+                  ? "border-green-300 bg-green-50/20 shadow-sm"
+                  : "border-beige-200 bg-beige-25 hover:border-beige-300 hover:bg-white"
+              }`}
+            >
+              <div className="p-4 sm:p-5">
+                <div className="flex items-center justify-between gap-3 mb-1.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-green-700 bg-green-100 px-2 py-0.5 rounded">
+                    Question {i + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setOpenIndex(isOpen ? null : i)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-green-700 hover:text-green-800 transition-colors"
+                  >
+                    <span>{isOpen ? "Hide Model Answer" : "View Model Answer"}</span>
+                    <ChevronDown
+                      size={15}
+                      className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                </div>
+
+                <p className="font-sans text-sm font-bold text-ink leading-snug mt-2">
                   {q.question}
                 </p>
-                <p className="mt-2 font-sans text-sm italic text-espresso-muted border-l-2 border-beige-300 pl-3">
-                  {q.rationale}
-                </p>
 
-                <button
-                  type="button"
-                  onClick={() => setOpenIndex(open ? null : i)}
-                  className="mt-4 flex items-center gap-1.5 font-sans text-xs font-bold uppercase tracking-widest text-navy transition-colors hover:text-navy-light"
-                >
-                  {open ? "Hide Answer" : "Show Answer"}
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}
-                  />
-                </button>
+                <div className="mt-2.5 flex items-start gap-1.5 text-xs text-ink-muted">
+                  <HelpCircle size={13} className="shrink-0 mt-0.5 text-beige-500" />
+                  <p className="italic leading-relaxed">{q.rationale}</p>
+                </div>
               </div>
 
-              {open && (
-                <div className="animate-fadeUp border-t border-beige-200 bg-navy-soft px-5 py-4">
-                  <p className="font-sans text-xs font-bold uppercase tracking-widest text-navy mb-2">
-                    Model Answer
-                  </p>
-                  <p className="font-sans text-sm font-medium leading-relaxed text-espresso">
+              {isOpen && (
+                <div className="px-5 py-4 bg-white border-t border-green-200/80 animate-fadeIn">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-green-800 mb-1.5">
+                    <CheckCircle2 size={14} className="text-green-600" />
+                    <span>Recommended Answer Strategy:</span>
+                  </div>
+                  <p className="font-sans text-xs sm:text-sm text-ink-light leading-relaxed pl-5 border-l-2 border-green-500">
                     {q.model_answer}
                   </p>
                 </div>

@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useDropzone, type FileRejection } from "react-dropzone";
-import { FileText, Paperclip, X } from "lucide-react";
+import { FileText, Upload, X, CheckCircle, AlertCircle } from "lucide-react";
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
@@ -21,11 +21,11 @@ export default function UploadPanel({ file, onFileSelected }: UploadPanelProps) 
       if (rejections.length > 0) {
         const reason = rejections[0].errors[0];
         if (reason.code === "file-too-large") {
-          setError("File is larger than 5MB. Please upload a smaller file.");
+          setError("File exceeds 5MB limit. Please upload a smaller file.");
         } else if (reason.code === "file-invalid-type") {
-          setError("Only PDF and DOCX files are accepted.");
+          setError("Only PDF and DOCX files are supported by the ATS parser.");
         } else {
-          setError("That file couldn't be used. Try a different one.");
+          setError("Failed to read file. Please try another resume document.");
         }
         return;
       }
@@ -47,50 +47,76 @@ export default function UploadPanel({ file, onFileSelected }: UploadPanelProps) 
 
   return (
     <div>
-      <div className="section-title">
-        <Paperclip size={18} className="text-navy" strokeWidth={2.5} />
-        <label>Resume</label>
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-xs font-bold uppercase tracking-wider text-ink-muted">
+          1. Upload Resume
+        </label>
+        <span className="text-[11px] font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-200">
+          PDF / DOCX
+        </span>
       </div>
 
       {!file ? (
         <div
           {...getRootProps()}
-          className={`cursor-pointer rounded-2xl border-2 border-dashed px-6 py-12 text-center transition-all duration-300 ${
+          className={`cursor-pointer rounded-xl border-2 border-dashed p-7 text-center transition-all duration-200 ${
             isDragActive
-              ? "border-navy bg-navy-soft shadow-inner"
-              : "border-beige-300 bg-beige-50/50 hover:border-navy hover:bg-beige-50"
+              ? "border-green-500 bg-green-50"
+              : "border-beige-200 bg-beige-25 hover:border-green-500 hover:bg-white"
           }`}
         >
           <input {...getInputProps()} />
-          <FileText size={28} className={`mx-auto mb-4 ${isDragActive ? 'text-navy' : 'text-beige-300'}`} strokeWidth={1.5} />
-          <p className="font-sans text-sm text-espresso">
-            <span className="font-semibold text-navy">Choose a file</span> or drag it here
+          <div
+            className={`mx-auto mb-3 w-12 h-12 rounded-xl flex items-center justify-center transition-colors ${
+              isDragActive ? "bg-green-100 text-green-700" : "bg-beige-100 text-ink-muted"
+            }`}
+          >
+            <Upload size={22} strokeWidth={1.75} />
+          </div>
+          <p className="font-sans text-sm font-semibold text-ink">
+            <span className="text-green-600 hover:underline">Click to upload</span> or drag and drop
           </p>
-          <p className="mt-2 font-sans text-xs font-medium text-espresso-muted tracking-wide">PDF or DOCX · up to 5MB</p>
+          <p className="mt-1 text-xs text-ink-muted">
+            Supported formats: PDF, DOCX (Max 5MB)
+          </p>
+          <div className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-medium text-green-700 bg-green-50 border border-green-200/80 px-2.5 py-0.5 rounded-full">
+            <CheckCircle size={12} />
+            ATS Compliant Format Ready
+          </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between rounded-xl border border-beige-200 bg-white px-5 py-4 shadow-sm transition-all hover:shadow-md">
-          <div className="flex min-w-0 items-center gap-4">
-            <div className="w-10 h-10 rounded-lg bg-navy-soft flex items-center justify-center shrink-0">
-              <FileText size={20} className="text-navy" strokeWidth={2} />
+        <div className="flex items-center justify-between rounded-xl border border-green-200 bg-green-50/70 p-4 transition-all animate-fadeIn">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-lg bg-green-100 text-green-700 flex items-center justify-center shrink-0 border border-green-200">
+              <FileText size={20} strokeWidth={2} />
             </div>
             <div className="min-w-0">
-              <p className="truncate font-sans font-medium text-espresso">{file.name}</p>
-              <p className="font-sans text-xs text-espresso-muted">{formatSize(file.size)}</p>
+              <p className="truncate font-sans text-sm font-bold text-ink">{file.name}</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <CheckCircle size={13} className="text-green-600" />
+                <p className="font-sans text-xs font-semibold text-green-700">
+                  {formatSize(file.size)} · Ready for ATS Scan
+                </p>
+              </div>
             </div>
           </div>
           <button
             type="button"
             onClick={() => onFileSelected(null)}
-            aria-label="Remove file"
-            className="shrink-0 rounded-full p-2 text-espresso-muted transition-colors hover:bg-rose-soft hover:text-rose-600"
+            aria-label="Remove resume"
+            className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-ink-muted hover:bg-beige-200 hover:text-ink transition-colors"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
       )}
 
-      {error && <p className="mt-3 font-sans text-sm font-medium text-rose-600 animate-fadeIn">{error}</p>}
+      {error && (
+        <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-red-600 bg-red-50 border border-red-200 p-2.5 rounded-lg animate-fadeIn">
+          <AlertCircle size={14} className="shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
     </div>
   );
 }
