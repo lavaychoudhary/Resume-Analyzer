@@ -2,7 +2,7 @@
 
 A full-stack AI-powered resume analysis tool. Upload a resume (PDF or DOCX) and paste a job description to receive a comprehensive evaluation including match scoring, skill gap analysis, impact assessment, soft skills review, and tailored interview preparation.
 
-**Powered by Google Gemini 2.5 Flash.**
+**Powered by Groq (GPT-OSS 120B).**
 
 ---
 
@@ -10,11 +10,19 @@ A full-stack AI-powered resume analysis tool. Upload a resume (PDF or DOCX) and 
 
 ```
 resume-analyzer/
-├── backend/      # FastAPI + Python (Gemini integration)
-└── frontend/     # React + Vite + TypeScript + Tailwind CSS
+├── api/                    # FastAPI backend (Python)
+│   ├── index.py            # App entry point, validation, endpoints
+│   ├── extractors/         # PDF / DOCX text extraction
+│   ├── schemas/            # Pydantic response models
+│   ├── services/
+│   │   └── groq_service.py # Groq integration
+│   └── requirements.txt
+├── src/                    # React + Vite + TypeScript + Tailwind frontend
+├── .env                    # Environment variables (not committed)
+└── package.json
 ```
 
-Both are independent projects — no shared package manager.
+The frontend and backend live in the same project folder and run as two separate processes.
 
 ---
 
@@ -22,100 +30,85 @@ Both are independent projects — no shared package manager.
 
 - **Python 3.11+** with `pip`
 - **Node.js 18+** with `npm`
-- **Gemini API Key** — get one at [Google AI Studio](https://aistudio.google.com/apikey)
+- **Groq API Key** — create one at [Groq Console](https://console.groq.com/keys) (starts with `gsk_`)
 
 ---
 
-## Backend Setup
+## Setup
 
-```bash
-cd backend
+All commands are run from the `resume-analyzer` folder.
 
+### 1. Backend
+
+```powershell
 # Create and activate a virtual environment
 python -m venv venv
-# Windows:
 venv\Scripts\activate
-# macOS/Linux:
-# source venv/bin/activate
 
 # Install dependencies
-pip install -r requirements.txt
-
-# Configure environment
-copy .env.example .env
-# Edit .env and add your Gemini API key:
-# GEMINI_API_KEY=your_key_here
-
-# Run the server
-uvicorn main:app --reload --port 8000
+pip install -r api\requirements.txt
 ```
 
-The API will be available at `http://localhost:8000`.
+### 2. Environment variables
 
-### API Endpoints
+Create a `.env` file in the `resume-analyzer` folder:
+
+```
+VITE_API_BASE_URL=http://localhost:8000
+GROQ_API_KEY=gsk_your_key_here
+```
+
+### 3. Frontend
+
+```powershell
+npm install
+```
+
+---
+
+## Running the App
+
+Open two terminals in the `resume-analyzer` folder.
+
+**Terminal 1 — Backend:**
+```powershell
+npm run backend
+```
+(equivalent to `venv\Scripts\python.exe -m uvicorn api.index:app --reload --port 8000`)
+
+**Terminal 2 — Frontend:**
+```powershell
+npm run dev
+```
+
+Then open `http://localhost:5173` in your browser.
+
+In VS Code you can also run the **"Run AI Resume Analyzer (Both)"** task to start both servers at once.
+
+---
+
+## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
 | `GET` | `/api/health` | Health check |
-| `POST` | `/api/analyze` | Analyze resume against job description |
+| `POST` | `/api` | Analyze a resume against a job description |
 
----
+`POST /api` accepts `multipart/form-data` with:
 
-## Frontend Setup
-
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Configure environment
-copy .env.example .env
-# The default VITE_API_BASE_URL=http://localhost:8000 should work for local dev
-
-# Run the dev server
-npm run dev
-```
-
-The app will be available at `http://localhost:5173`.
+- `resume` — PDF or DOCX file (max 5 MB)
+- `job_description` — job description text
 
 ---
 
 ## Environment Variables
 
-### Backend (`backend/.env`)
-
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `GEMINI_API_KEY` | Your Google Gemini API key | *(required)* |
+| `GROQ_API_KEY` | Your Groq API key | *(required)* |
+| `GROQ_MODEL` | Override the model used for analysis | `openai/gpt-oss-120b`, falling back to `qwen/qwen3.6-27b` then `openai/gpt-oss-20b` |
 | `ALLOWED_ORIGINS` | Comma-separated CORS origins | `http://localhost:5173` |
-
-### Frontend (`frontend/.env`)
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `VITE_API_BASE_URL` | Backend API URL | `http://localhost:8000` |
-
----
-
-## Running Both Servers
-
-Open two terminals:
-
-**Terminal 1 — Backend:**
-```bash
-cd backend
-venv\Scripts\activate
-uvicorn main:app --reload --port 8000
-```
-
-**Terminal 2 — Frontend:**
-```bash
-cd frontend
-npm run dev
-```
-
-Then open `http://localhost:5173` in your browser.
+| `VITE_API_BASE_URL` | Backend URL used by the frontend | `http://localhost:8000` |
 
 ---
 
@@ -129,12 +122,24 @@ Then open `http://localhost:5173` in your browser.
 - **Interview Prep** — 3-5 tailored questions with model answers
 - **ATS Compatibility** — formatting issue detection
 - **Actionable Suggestions** — specific improvement recommendations
+- **Resume Verification** — rejects non-resume documents
+
+---
+
+## Troubleshooting
+
+| Error | Fix |
+|-------|-----|
+| `ModuleNotFoundError: No module named 'groq'` | Install into the venv: `venv\Scripts\python.exe -m pip install groq` |
+| `Invalid GROQ_API_KEY` | Check `.env` — the key should start with `gsk_`, with no quotes or spaces. Restart the backend after editing. |
+| `Groq rate limit exceeded` | Wait a moment and retry, or check your usage limits in the Groq Console. |
+| "Cannot connect to the backend server" | Make sure the backend is running on port 8000. |
 
 ---
 
 ## Security Notes
 
-- API keys are never committed — only `.env.example` files are tracked
+- API keys are never committed — `.env` is in `.gitignore`
 - All file uploads are processed in-memory (never written to disk)
 - Server-side validation enforces file type, size, and content checks
-- Gemini errors are caught and returned as clean error messages (no SDK errors leaked)
+- Groq errors are caught and returned as clean error messages (no SDK errors leaked)

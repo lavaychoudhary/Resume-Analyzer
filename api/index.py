@@ -1,7 +1,7 @@
 """
 AI Resume Analyzer — FastAPI Backend
 
-Provides endpoints for resume analysis using Gemini AI.
+Provides endpoints for resume analysis using Groq AI.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from extractors.text_extractor import ExtractionError, extract_text
 from schemas.models import AnalysisResult
-from services.gemini_service import GeminiServiceError, analyze_resume
+from services.groq_service import GroqServiceError, analyze_resume
 
 # ── Load environment ───────────────────────────────────────────────────────
 load_dotenv(override=True)
@@ -63,7 +63,7 @@ async def analyze(
     job_description: str = Form(..., description="Job description text"),
 ):
     """
-    Analyze a resume against a job description using Gemini AI.
+    Analyze a resume against a job description using Groq AI.
 
     Accepts multipart/form-data with a resume file and job description text.
     Returns a structured analysis including match score, strengths, gaps,
@@ -154,10 +154,10 @@ async def analyze(
             detail="This is not a resume! Please upload a valid resume or CV.",
         )
 
-    # ── Call Gemini for analysis ───────────────────────────────────────
+    # ── Call Groq for analysis ───────────────────────────────────────
     try:
         result = await analyze_resume(resume_text, job_description)
-    except GeminiServiceError as exc:
+    except GroqServiceError as exc:
         raise HTTPException(
             status_code=502,
             detail=str(exc),
